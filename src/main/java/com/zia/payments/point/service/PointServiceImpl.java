@@ -45,7 +45,7 @@ public class PointServiceImpl implements PointService {
 
         // 지갑 조회 또는 생성 (비관적 락 적용)
         PointWallet wallet = pointWalletRepository.findByUserIdWithLock(userId)
-                .orElseGet(() -> createNewWallet(user));
+                .orElseThrow(() -> new ApiException(ErrorCode.WALLET_NOT_FOUND));
 
         // 포인트 증가
         wallet.increase(amount);
@@ -74,7 +74,7 @@ public class PointServiceImpl implements PointService {
      * @return 현재 잔액 (없으면 0)
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Long getBalance(Long userId) {
         return pointWalletRepository.findByUserId(userId)
                 .map(PointWallet::getBalance)
@@ -88,7 +88,7 @@ public class PointServiceImpl implements PointService {
                 .balance(0L)
                 .build();
         PointWallet savedWallet = pointWalletRepository.save(newWallet);
-        log.info("새 지갑 생성 : ussrId={}", user.getId());
+        log.info("새 지갑 생성 : userId={}", user.getId());
         return savedWallet;
     }
 }
