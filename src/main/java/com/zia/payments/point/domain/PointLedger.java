@@ -57,4 +57,31 @@ public class PointLedger {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    /** 팩토리 메서드 : 충전용
+     * type을 자동으로 CHARGE로 설정
+     * Service에서 type을 신경 쓸 필요 없음
+     * CHARGE 생성 규칙이 변경되면 여기만 수정
+     * 도메인 로직은 Domain에 캡슐화
+     */
+    public static PointLedger charge(User user, Long amount, Long balanceAfter, String memo) {
+        return PointLedger.builder()
+                .user(user)
+                .type(PointLedgerType.CHARGE) // 자동설정 (비즈니스 로직)
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .memo(memo)
+                .build();
+    }
+
+    // 팩토리 메서드 : 차감용
+    public static PointLedger redeem(User user, Long amount, Long balanceAfter, String memo) {
+        return PointLedger.builder()
+                .user(user)
+                .type(PointLedgerType.REDEEM)
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .memo(memo)
+                .build();
+    }
 }
