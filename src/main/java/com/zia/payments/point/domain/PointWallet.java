@@ -1,5 +1,7 @@
 package com.zia.payments.point.domain;
 
+import com.zia.payments.global.exception.ApiException;
+import com.zia.payments.global.exception.ErrorCode;
 import com.zia.payments.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
         name = "point_wallets",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_point_wallets_user_id", columnNames = {"user_id"})
-        }
+        } // 잔액 조회
 )
 public class PointWallet {
 
@@ -52,14 +54,18 @@ public class PointWallet {
     }
 
     public void increase(long amount) {
-        if(amount <= 0) throw new IllegalArgumentException("금액은 양수여야 합니다.");
+        if(amount <= 0) {
+            throw new ApiException(ErrorCode.INVALID_AMOUNT);
+        }
         this.balance += amount;
     }
 
     public void decrease(long amount) {
-        if(amount <=0) throw new IllegalArgumentException("금액은 양수여야 합니다.");
+        if(amount <=0) {
+            throw new ApiException(ErrorCode.INVALID_AMOUNT);
+        }
         if (this.balance < amount) {
-            throw new IllegalStateException("잔액 부족");
+            throw new ApiException(ErrorCode.INSUFFICIENT_BALANCE);
         }
         this.balance -= amount;
     }
