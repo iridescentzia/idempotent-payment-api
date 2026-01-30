@@ -2,12 +2,10 @@ package com.zia.payments.user.controller;
 
 import com.zia.payments.global.response.ApiResponse;
 import com.zia.payments.user.domain.User;
+import com.zia.payments.user.dto.request.UserCreateRequest;
 import com.zia.payments.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -18,8 +16,8 @@ public class UserController {
 
     // 사용자 생성 : POST /api/users
     @PostMapping
-    public ApiResponse<User> createUser(@RequestParam String name) {
-        User user = userService.createUser(name);
+    public ApiResponse<User> createUser(@RequestBody UserCreateRequest request) {
+        User user = userService.createUser(request.getName());
         return ApiResponse.success(user);
     }
 }
