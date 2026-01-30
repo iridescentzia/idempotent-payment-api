@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface PointWalletRepository extends JpaRepository<PointWallet, Long> {
-    Optional<PointWallet> findByUserId(Long userId);
+    Optional<PointWallet> findByUserId(Long userId); // 유저 지갑 조회
 }
