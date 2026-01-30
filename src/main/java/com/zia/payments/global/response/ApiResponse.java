@@ -3,12 +3,11 @@ package com.zia.payments.global.response;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import tools.jackson.databind.annotation.JsonAppend;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonAppend
 public class ApiResponse<T> {
+
     private String status;
     private T data;
     private String message;
