@@ -1,4 +1,7 @@
 package com.zia.payments.point.domain;
 
-public class PointLedgerType {
+public enum PointLedgerType {
+    CHARGE,
+    REDEEM,
+    REFUND
 }
