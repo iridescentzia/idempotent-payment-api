@@ -2,8 +2,10 @@ package com.zia.payments.point.controller;
 
 import com.zia.payments.global.response.ApiResponse;
 import com.zia.payments.point.dto.request.ChargeRequest;
+import com.zia.payments.point.dto.request.RedeemRequest;
 import com.zia.payments.point.dto.response.BalanceResponse;
 import com.zia.payments.point.dto.response.ChargeResponse;
+import com.zia.payments.point.dto.response.RedeemResponse;
 import com.zia.payments.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +41,19 @@ public class PointController {
                         .balance(balance)
                         .build()
         );
+    }
+
+    // 포인트 차감 (결제) : POST /api/users/{userId}/redeem
+    @PostMapping("/redeem")
+    public ApiResponse<RedeemResponse> redeemPoints(
+            @PathVariable long userId,
+            @RequestBody RedeemRequest request
+    ) {
+        RedeemResponse response = pointService.redeem(
+                userId,
+                request.getAmount(),
+                request.getMemo()
+        );
+        return ApiResponse.success(response);
     }
 }
