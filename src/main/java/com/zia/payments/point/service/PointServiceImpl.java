@@ -5,6 +5,7 @@ import com.zia.payments.global.exception.ErrorCode;
 import com.zia.payments.point.domain.PointLedger;
 import com.zia.payments.point.domain.PointWallet;
 import com.zia.payments.point.dto.response.ChargeResponse;
+import com.zia.payments.point.dto.response.RedeemResponse;
 import com.zia.payments.point.repository.PointLedgerRepository;
 import com.zia.payments.point.repository.PointWalletRepository;
 import com.zia.payments.user.domain.User;
@@ -90,5 +91,49 @@ public class PointServiceImpl implements PointService {
         PointWallet savedWallet = pointWalletRepository.save(newWallet);
         log.info("새 지갑 생성 : userId={}", user.getId());
         return savedWallet;
+    }
+
+    /**
+     * 포인트 차감 (동시성 제어 포함)
+     * @param userId
+     * @param amount 차감 금액 (양수만 가능)
+     * @param memo 메모
+     * @return 차감 결과 DTO
+     */
+    @Override
+    @Transactional
+    public RedeemResponse redeem(Long userId, Long amount, String memo) {
+
+        // amount 검증
+        if(amount == null || amount <= 0) {
+            throw new ApiException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        // 유저 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+
+        // 지갑 조회 (비관적 락 적용)
+        PointWallet wallet = pointWalletRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.WALLET_NOT_FOUND));
+
+        // 포인트 차감 (잔액 부족 체크)
+        wallet.decrease(amount);
+
+        // 지갑 저장
+        pointWalletRepository.save(wallet);
+
+        // 원장 기록 (redeem)
+        PointLedger ledger = PointLedger.redeem(user, amount, wallet.getBalance(), memo);
+        pointLedgerRepository.save(ledger);
+
+        log.info("포인트 차감 성공: userId={}, amount={}, balanceAfter={}", userId, amount, wallet.getBalance());
+
+        return RedeemResponse.builder()
+                .userId(userId)
+                .redeemedAmount(amount)
+                .balanceAfter(wallet.getBalance())
+                .memo(memo)
+                .build();
     }
 }
