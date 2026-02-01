@@ -2,6 +2,7 @@ package com.zia.payments.point.service;
 
 import com.zia.payments.global.exception.ApiException;
 import com.zia.payments.point.domain.PointWallet;
+import com.zia.payments.point.repository.PointLedgerRepository;
 import com.zia.payments.point.repository.PointWalletRepository;
 import com.zia.payments.user.domain.User;
 import com.zia.payments.user.repository.UserRepository;
@@ -29,6 +30,7 @@ public class PointServiceConcurrencyTest {
     @Autowired private PointService pointService;
     @Autowired private UserRepository userRepository;
     @Autowired private PointWalletRepository pointWalletRepository;
+    @Autowired private PointLedgerRepository pointLedgerRepository;
 
     // 테스트용 : 초기 잔액을 가진 User + Wallet 생성
     private Long createTestUserWithBalance(Long initialBalance) {
@@ -50,6 +52,7 @@ public class PointServiceConcurrencyTest {
     void tearDown() {
         pointWalletRepository.deleteAll();
         userRepository.deleteAll();
+        pointLedgerRepository.deleteAll();
     }
 
     // 락 없는 잔액 차감 테스트 -> 실패 재현용
