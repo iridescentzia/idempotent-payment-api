@@ -13,7 +13,7 @@ public interface PointWalletRepository extends JpaRepository<PointWallet, Long> 
 
     Optional<PointWallet> findByUserId(Long userId); // 유저 지갑 조회
 
-    // Day 2: SELECT FOR UPDATE
+    // SELECT FOR UPDATE
     @Query("SELECT pw FROM PointWallet pw WHERE pw.user.id = :userId")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<PointWallet> findByUserIdWithLock(@Param("userId") Long userId);

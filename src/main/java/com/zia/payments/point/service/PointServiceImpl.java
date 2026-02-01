@@ -136,4 +136,35 @@ public class PointServiceImpl implements PointService {
                 .memo(memo)
                 .build();
     }
+
+    /** 포인트 차감 (동시성 X - 테스트용)
+     *
+     */
+    @Transactional
+    public RedeemResponse redeemNoLock(Long userId, Long amount, String memo) {
+        if(amount == null || amount <= 0) {
+            throw new ApiException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+
+        // 락 없이 조회
+        PointWallet wallet = pointWalletRepository.findByUserId(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.WALLET_NOT_FOUND));
+
+        wallet.decrease(amount);
+
+        pointWalletRepository.save(wallet);
+
+        PointLedger ledger = PointLedger.redeem(user, amount, wallet.getBalance(), memo);
+        pointLedgerRepository.save(ledger);
+
+        return RedeemResponse.builder()
+                .userId(userId)
+                .redeemedAmount(amount)
+                .balanceAfter(wallet.getBalance())
+                .memo(memo)
+                .build();
+    }
 }
