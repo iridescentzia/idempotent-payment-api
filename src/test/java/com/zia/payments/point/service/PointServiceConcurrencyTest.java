@@ -52,8 +52,59 @@ public class PointServiceConcurrencyTest {
         userRepository.deleteAll();
     }
 
+    // 락 없는 잔액 차감 테스트 -> 실패 재현용
     @Test
-    @DisplayName("동시 차감: 100개 스레드가 동시에 1000원씩 차감 -> 최종 잔액 0")
+    @DisplayName("[NO LOCK] 100개 스레드가 동시에 1000원씩 차감 -> 잔액/성공횟수 불일치 가능")
+    void testConcurrentRedeem_noLock() throws Exception {
+        Long testUserId = createTestUserWithBalance(100_000L);
+
+        int threadCount = 100;
+        long redeemAmount = 1_000L;
+
+        ExecutorService executor = Executors.newFixedThreadPool(32);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (int i = 0; i < threadCount; i++) {
+            futures.add(executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    pointService.redeemNoLock(testUserId, redeemAmount, "no-lock-test");
+                    successCount.incrementAndGet();
+                } catch (ApiException e) {
+                    failCount.incrementAndGet();
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                    log.error("예상치 못한 에러", e);
+                } finally {
+                    doneLatch.countDown();
+                }
+            }));
+        }
+        startLatch.countDown();
+        doneLatch.await();
+        executor.shutdown();
+
+        for (Future<?> f : futures) {
+            f.get();
+        }
+
+        Long finalBalance = pointService.getBalance(testUserId);
+
+        log.info("--- [NO LOCK] 동시성 테스트 결과 ---");
+        log.info("성공: {}개, 실패: {}개", successCount.get(), failCount.get());
+        log.info("최종 잔액: {}", finalBalance);
+
+        assertTrue(finalBalance >= 0); // 최소 검증
+    }
+
+    // 락 적용 잔액 차감 테스트
+    @Test
+    @DisplayName("[LOCK] 100개 스레드가 동시에 1000원씩 차감 -> 최종 잔액 0")
     void testConcurrentRedeem_allSuccess() throws Exception {
 
         Long testUserId = createTestUserWithBalance(100_000L);
@@ -75,7 +126,6 @@ public class PointServiceConcurrencyTest {
             futures.add(executor.submit(() -> {
                 try {
                     startLatch.await(); // 모두 함께 출발
-
                     pointService.redeem(testUserId, redeemAmount,"concurrent-redeem");
                     successCount.incrementAndGet();
 

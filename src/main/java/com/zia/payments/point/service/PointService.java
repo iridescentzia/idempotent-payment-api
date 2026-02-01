@@ -8,4 +8,5 @@ public interface PointService {
     ChargeResponse charge(Long userId, Long amount, String memo); // DTO 반환
     Long getBalance(Long userId);
     RedeemResponse redeem(Long userId, Long amount, String memo);
+    RedeemResponse redeemNoLock(Long userId, Long amount, String memo);
 }

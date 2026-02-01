@@ -140,6 +140,7 @@ public class PointServiceImpl implements PointService {
     /** 포인트 차감 (동시성 X - 테스트용)
      *
      */
+    @Override
     @Transactional
     public RedeemResponse redeemNoLock(Long userId, Long amount, String memo) {
         if(amount == null || amount <= 0) {
