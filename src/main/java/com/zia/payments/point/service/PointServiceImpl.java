@@ -138,7 +138,7 @@ public class PointServiceImpl implements PointService {
     }
 
     /** 포인트 차감 (동시성 X - 테스트용)
-     *
+     * 동시성 깨지는 케이스 재현 목적
      */
     @Override
     @Transactional
