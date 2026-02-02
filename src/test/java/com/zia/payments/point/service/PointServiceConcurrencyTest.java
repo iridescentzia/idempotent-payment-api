@@ -51,8 +51,8 @@ public class PointServiceConcurrencyTest {
     @AfterEach
     void tearDown() {
         pointWalletRepository.deleteAll();
-        userRepository.deleteAll();
         pointLedgerRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     // 락 없는 잔액 차감 테스트 -> 실패 재현용
