@@ -15,6 +15,10 @@ public enum ErrorCode {
     INSUFFICIENT_BALANCE(HttpStatus.CONFLICT, "INSUFFICIENT_BALANCE", "포인트 잔액이 부족합니다"),
     INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "INVALID_AMOUNT", "포인트 금액은 0보다 커야 합니다"),
 
+    // 멱등성 관련
+    IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key가 필요합니다"),
+    IDEMPOTENCY_IN_PROGRESS(HttpStatus.CONFLICT, "IDEMPOTENCY_IN_PROGRESS", "이미 처리 중인 요청입니다"),
+
     // 공통
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "서버 내부 오류가 발생했습니다"),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "잘못된 요청입니다");

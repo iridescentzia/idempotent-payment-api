@@ -16,4 +16,5 @@ public class RedeemRequest {
     private Long amount;
 
     private String memo;
+    private String requestId;
 }
