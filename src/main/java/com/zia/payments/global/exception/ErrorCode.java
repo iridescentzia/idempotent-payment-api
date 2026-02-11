@@ -18,6 +18,7 @@ public enum ErrorCode {
     // 멱등성 관련
     IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key가 필요합니다"),
     IDEMPOTENCY_IN_PROGRESS(HttpStatus.CONFLICT, "IDEMPOTENCY_IN_PROGRESS", "이미 처리 중인 요청입니다"),
+    IDEMPOTENCY_FAILED(HttpStatus.CONFLICT, "IDEMPOTENCY_FAILED", "이전 요청이 실패했습니다. 새로운 Idempotency-Key로 재요청하세요."),
 
     // 공통
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "서버 내부 오류가 발생했습니다"),

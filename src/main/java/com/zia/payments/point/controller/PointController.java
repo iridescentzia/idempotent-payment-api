@@ -51,15 +51,8 @@ public class PointController {
     public ApiResponse<RedeemResponse> redeemPoints(
             @PathVariable long userId,
             @RequestBody RedeemRequest request,
-            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey
+            @RequestHeader(value = "Idempotency-Key", required = false) String requestId
     ) {
-        // Header가 없으면 Body의 requestId 사용
-        String requestId = idempotencyKey != null ? idempotencyKey : request.getRequestId();
-
-        // requestId 검증
-        if(requestId == null || requestId.isBlank()) {
-            throw new ApiException(ErrorCode.BAD_REQUEST, "Idempotency-key 헤더 또는 requestId가 필수입니다.");
-        }
 
         RedeemResponse response = pointService.redeem(
                 userId,

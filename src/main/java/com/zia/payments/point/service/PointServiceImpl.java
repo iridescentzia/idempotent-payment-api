@@ -112,18 +112,24 @@ public class PointServiceImpl implements PointService {
 
         // requestId 검증
         if(requestId == null || requestId.isBlank()) {
-            throw new ApiException(ErrorCode.BAD_REQUEST, "requestId는 필수입니다.");
+            throw new ApiException(ErrorCode.IDEMPOTENCY_KEY_REQUIRED);
         }
 
         // 멱등키 조회 (SUCCESS면 캐시 반환)
         IdempotencyRequest idempotencyRequest = idempotencyService.findByRequestId(requestId);
-        if(idempotencyRequest != null && idempotencyRequest.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
-            log.info("멱등성 캐시 히트 : requestId={}, userId={}", requestId, userId);
-            return parseRedeemResponse(idempotencyRequest.getResponseBody());
+        if (idempotencyRequest != null && idempotencyRequest.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
+                log.info("멱등성 캐시 히트(SUCCESS) : requestId={}, userId={}", requestId, userId);
+                return parseRedeemResponse(idempotencyRequest.getResponseBody());
         }
 
-        // IN_PROGRESS로 선점
-        idempotencyService.createInProgress(userId, requestId, "/api/users/{userId}/points/redeem");
+        // IN_PROGRESS로 선점 (반환값 확인)
+        IdempotencyRequest acquired = idempotencyService.createInProgress(userId, requestId, "/api/users/{userId}/points/redeem");
+
+        // 반환 값 확인 (레이스 컨디션 방어)
+        if (acquired.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
+            log.info("다른 스레드가 이미 완료함 : requestId={}", requestId);
+            return parseRedeemResponse(acquired.getResponseBody());
+        }
 
         try {
             // 실제 차감 로직

@@ -3,6 +3,7 @@ package com.zia.payments.idempotency.service;
 import com.zia.payments.global.exception.ApiException;
 import com.zia.payments.global.exception.ErrorCode;
 import com.zia.payments.idempotency.domain.IdempotencyRequest;
+import com.zia.payments.idempotency.domain.IdempotencyStatus;
 import com.zia.payments.idempotency.repository.IdempotencyRequestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,16 @@ public class IdempotencyServiceImpl implements IdempotencyService {
 
             log.info("멱등키 이미 존재 : requestId={}, status={}", requestId, existing.getIdempotencyStatus());
 
+            // 상태별 처리
+            if(existing.getIdempotencyStatus() == IdempotencyStatus.IN_PROGRESS) {
+                throw new ApiException(ErrorCode.IDEMPOTENCY_IN_PROGRESS);
+            }
+
+            if(existing.getIdempotencyStatus() == IdempotencyStatus.FAILED) {
+                throw new ApiException(ErrorCode.IDEMPOTENCY_FAILED);
+            }
+
+            // SUCCESS인 경우만 반환
             return existing;
         }
     }
