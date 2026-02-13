@@ -28,6 +28,7 @@ public class PointServiceImpl implements PointService {
     private final PointLedgerRepository pointLedgerRepository;
     private final UserRepository userRepository;
     private final IdempotencyService idempotencyService;
+    private final ObjectMapper objectMapper;
 
     /**
      * 포인트 충전
@@ -85,17 +86,6 @@ public class PointServiceImpl implements PointService {
         return pointWalletRepository.findByUserId(userId)
                 .map(PointWallet::getBalance)
                 .orElse(0L);
-    }
-
-    // 새로운 지갑 생성 헬퍼 메서드
-    private PointWallet createNewWallet(User user) {
-        PointWallet newWallet = PointWallet.builder()
-                .user(user)
-                .balance(0L)
-                .build();
-        PointWallet savedWallet = pointWalletRepository.save(newWallet);
-        log.info("새 지갑 생성 : userId={}", user.getId());
-        return savedWallet;
     }
 
     /**
@@ -217,8 +207,7 @@ public class PointServiceImpl implements PointService {
     // JSON 직렬화 (멱등성용)
     private String serializeRedeemResponse(RedeemResponse response) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(response);
+            return objectMapper.writeValueAsString(response);
         } catch (Exception e) {
             log.error("RedeemResponse 직렬화 실패 : {}", response, e);
             throw new ApiException(ErrorCode.INTERNAL_ERROR);
@@ -228,8 +217,7 @@ public class PointServiceImpl implements PointService {
     // JSON 역직렬화 (멱등성용)
     private RedeemResponse parseRedeemResponse(String json) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, RedeemResponse.class);
+            return objectMapper.readValue(json, RedeemResponse.class);
         } catch (Exception e) {
             log.error("RedeemResponse 파싱 실패 : {}", json, e);
             throw new ApiException(ErrorCode.INTERNAL_ERROR);
