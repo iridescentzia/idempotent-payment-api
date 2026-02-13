@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public IdempotencyRequest createInProgress(Long userId, String requestId, String endpoint) {
         try {
             // 선점 시 insert 먼저
@@ -56,8 +57,9 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         }
     }
 
+    // REQUIRES_NEW 적용 (독립 트랜잭션)
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markSuccess(String requestId, String responseBody) {
         IdempotencyRequest req = idempotencyRequestRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new ApiException(ErrorCode.BAD_REQUEST, "멱등키 조회 실패"));
@@ -68,8 +70,9 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         log.info("멱등키 SUCCESS : requestId={}", requestId);
     }
 
+    // REQUIRES_NEW 적용 (독립 트랜잭션)
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markFailed(String requestId) {
         IdempotencyRequest req = idempotencyRequestRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new ApiException(ErrorCode.BAD_REQUEST, "멱등키 조회 실패"));
