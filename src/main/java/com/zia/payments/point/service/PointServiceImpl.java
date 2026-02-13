@@ -107,9 +107,16 @@ public class PointServiceImpl implements PointService {
 
         // 멱등키 조회 (SUCCESS면 캐시 반환)
         IdempotencyRequest idempotencyRequest = idempotencyService.findByRequestId(requestId);
-        if (idempotencyRequest != null && idempotencyRequest.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
+        if (idempotencyRequest != null) {
+            // userId 매칭 검증
+            if (idempotencyRequest.getUserId() != null && !idempotencyRequest.getUserId().equals(userId)) {
+                throw new ApiException(ErrorCode.BAD_REQUEST, "Idempotency-Key가 다른 사용자에 의해 사용되었습니다.");
+            }
+
+            if (idempotencyRequest.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
                 log.info("멱등성 캐시 히트(SUCCESS) : requestId={}, userId={}", requestId, userId);
                 return parseRedeemResponse(idempotencyRequest.getResponseBody());
+            }
         }
 
         // IN_PROGRESS로 선점 (반환값 확인)
@@ -118,6 +125,9 @@ public class PointServiceImpl implements PointService {
         // 반환 값 확인 (레이스 컨디션 방어)
         if (acquired.getIdempotencyStatus() == IdempotencyStatus.SUCCESS) {
             log.info("다른 스레드가 이미 완료함 : requestId={}", requestId);
+            if (acquired.getUserId() != null && !acquired.getUserId().equals(userId)) {
+                throw new ApiException(ErrorCode.BAD_REQUEST, "Idempotency-Key가 다른 사용자에 의해 사용되었습니다.");
+            }
             return parseRedeemResponse(acquired.getResponseBody());
         }
 

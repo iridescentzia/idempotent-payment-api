@@ -49,9 +49,9 @@ public class PointController {
     // Header : Idempotency-Key
     @PostMapping("/redeem")
     public ApiResponse<RedeemResponse> redeemPoints(
-            @PathVariable long userId,
+            @PathVariable Long userId,
             @RequestBody RedeemRequest request,
-            @RequestHeader(value = "Idempotency-Key", required = false) String requestId
+            @RequestHeader(value = "Idempotency-Key") String requestId
     ) {
 
         RedeemResponse response = pointService.redeem(
