@@ -31,7 +31,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             // 선점 시 insert 먼저
             IdempotencyRequest req = IdempotencyRequest.inProgress(requestId, userId, endpoint);
-            IdempotencyRequest saved = idempotencyRequestRepository.save(req);
+            IdempotencyRequest saved = idempotencyRequestRepository.saveAndFlush(req);
 
             log.info("멱등키 선점 성공(IN_PROGRESS): requestId={}, userId={}, endpoint={}", requestId, userId, endpoint);
 
@@ -65,7 +65,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
                 .orElseThrow(() -> new ApiException(ErrorCode.BAD_REQUEST, "멱등키 조회 실패"));
 
         req.markSuccess(responseBody);
-        // save 필요 x
+        idempotencyRequestRepository.flush();
 
         log.info("멱등키 SUCCESS : requestId={}", requestId);
     }
@@ -78,7 +78,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
                 .orElseThrow(() -> new ApiException(ErrorCode.BAD_REQUEST, "멱등키 조회 실패"));
 
         req.markFailed();
-        // save 필요 x
+        idempotencyRequestRepository.flush();
 
         log.info("멱등키 FAILED : requestId={}", requestId);
     }
