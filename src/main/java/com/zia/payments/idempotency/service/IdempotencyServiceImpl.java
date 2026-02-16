@@ -4,14 +4,11 @@ import com.zia.payments.global.exception.ApiException;
 import com.zia.payments.global.exception.ErrorCode;
 import com.zia.payments.idempotency.domain.IdempotencyRequest;
 import com.zia.payments.idempotency.domain.IdempotencyStatus;
-import com.zia.payments.idempotency.repository.IdempotencyRequestRepository;
-import com.zia.payments.idempotency.support.IdempotencyTxExecutor;
+import com.zia.payments.idempotency.util.IdempotencyTxExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service

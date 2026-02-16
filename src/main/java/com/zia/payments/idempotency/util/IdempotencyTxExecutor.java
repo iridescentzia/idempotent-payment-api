@@ -1,4 +1,4 @@
-package com.zia.payments.idempotency.support;
+package com.zia.payments.idempotency.util;
 
 import com.zia.payments.global.exception.ApiException;
 import com.zia.payments.global.exception.ErrorCode;
@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

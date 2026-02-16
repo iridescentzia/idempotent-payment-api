@@ -22,7 +22,15 @@ public enum ErrorCode {
 
     // 공통
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "서버 내부 오류가 발생했습니다"),
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "잘못된 요청입니다");
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "잘못된 요청입니다"),
+
+    // 쿠폰 관련
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "COUPON_NOT_FOUND", "쿠폰을 찾을 수 없습니다"),
+    COUPON_EXPIRED(HttpStatus.CONFLICT, "COUPON_EXPIRED", "쿠폰이 만료되었습니다"),
+    COUPON_SOLD_OUT(HttpStatus.CONFLICT, "COUPON_SOLD_OUT", "쿠폰이 품절되었습니다"),
+    COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "COUPON_ALREADY_ISSUED", "이미 발급받은 쿠폰입니다"),
+    COUPON_ALREADY_USED(HttpStatus.CONFLICT, "COUPON_ALREADY_USED", "이미 사용된 쿠폰입니다"),
+    COUPON_NOT_OWNED(HttpStatus.FORBIDDEN, "COUPON_NOT_OWNED", "쿠폰 소유자가 아닙니다");
 
     private final HttpStatus status;
     private final String code;
