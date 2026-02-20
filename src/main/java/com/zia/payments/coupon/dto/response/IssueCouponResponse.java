@@ -5,11 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ClaimCouponResponse {
+public class IssueCouponResponse {
     private Long userId;
-    private Long couponId;
     private Long userCouponId;
-    private String couponCode;
-    private String title;
-    private Long discountValue;
+    private String status; // USED
 }
