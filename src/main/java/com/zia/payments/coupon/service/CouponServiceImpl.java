@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -35,13 +36,11 @@ public class CouponServiceImpl implements CouponService {
      * - user_coupons INSERT (UNIQUE 최종 보장)
      */
 
+    @Transactional
     @Override
-    public ClaimCouponResponse claim(Long userId, ClaimCouponRequest request, String requestId) {
-        if (request == null || request.getCouponCode() == null || request.getCouponCode().isBlank()) {
-            throw new ApiException(ErrorCode.BAD_REQUEST, "couponCode가 필요합니다.");
-        }
+    public ClaimCouponResponse claim(Long userId, Long couponId, ClaimCouponRequest request, String requestId) {
 
-        Coupon coupon = couponRepository.findByCode(request.getCouponCode())
+        Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new ApiException(ErrorCode.COUPON_NOT_FOUND));
 
         LocalDateTime now = LocalDateTime.now();
@@ -51,7 +50,7 @@ public class CouponServiceImpl implements CouponService {
 
         // 빠른 실패(UX) -> 최종 보장은 UNIQUE
         if (userCouponRepository.existsByUserIdAndCoupon_Id(userId, coupon.getId())) {
-            throw new ApiException(ErrorCode.COUPON_ALREADY_USED);
+            throw new ApiException(ErrorCode.COUPON_ALREADY_ISSUED);
         }
 
         // 선착순이면 재고 확보
@@ -80,10 +79,11 @@ public class CouponServiceImpl implements CouponService {
                     .build();
         } catch (DataIntegrityViolationException e) {
             // 동시 요청으로 exists 체크를 통과해도 여기서 UNIQUE로 막힘
-            throw new ApiException(ErrorCode.COUPON_ALREADY_USED);
+            throw new ApiException(ErrorCode.COUPON_ALREADY_ISSUED);
         }
     }
 
+    @Transactional
     @Override
     public IssueCouponResponse use(Long userId, Long userCouponId) {
         UserCoupon userCoupon = userCouponRepository.findByIdAndUserId(userCouponId, userId)

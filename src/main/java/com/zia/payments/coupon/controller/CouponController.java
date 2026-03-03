@@ -16,16 +16,16 @@ public class CouponController {
     private final CouponService couponService;
 
     /**
-     * 선착순 발급 : POST /api/users/{userId}/coupons/claim
+     * 선착순 발급 : POST /api/users/{userId}/coupons/{couponId}/claim
      * Header : Idempotency-Key
      */
-    @PostMapping("/claim")
+    @PostMapping("/{couponId}/claim")
     public ApiResponse<ClaimCouponResponse> claim(
             @PathVariable Long userId,
-            @RequestBody ClaimCouponRequest request,
+            @PathVariable Long couponId,
             @RequestHeader(value = "Idempotency-Key", required = false) String requestId
     ) {
-        return ApiResponse.success(couponService.claim(userId, request, requestId));
+        return ApiResponse.success(couponService.claim(userId, couponId, null, requestId));
     }
 
     /**
