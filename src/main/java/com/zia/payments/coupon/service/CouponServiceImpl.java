@@ -55,6 +55,7 @@ public class CouponServiceImpl implements CouponService {
         }
 
         // 선착순이면 재고 확보
+        // rowCount가 0이면 updated == 0
         if (coupon.isFirstComeFirstServed()) {
             int updated = couponRepository.tryIncreaseIssuedCount(coupon.getId());
             if (updated == 0) {
